@@ -21,6 +21,32 @@ def copy_if_newer( from, to, echo = true )
   end
 end
 
+# Returns the amount in bytes of free disk space in the specified folder.
+#
+def fs_disk_free( path )
+  result = `df -k #{path}`.split("\n")[1]
+  device, d_size, d_usage, d_free = result.split(" ")[0..3]
+	  
+  d_free.to_i*1024 # in bytes
+end
+
+# Returns the amount in bytes of used disk space in the specified folder.
+#
+def fs_disk_used( path )
+  # First, dereference path
+  if File.symlink? @path 
+    p = File.readlink( @path )
+  else
+    p = @path
+  end
+	result = `du -ks #{p}`
+	m = /(\d+)\s+.*/.match result
+	if m
+		m[1].to_i*1024
+	else
+		result
+	end
+end
 
 # Returns a host OS name in lowercase.
 #
