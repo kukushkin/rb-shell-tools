@@ -79,3 +79,10 @@ def putr( str )
   print "#{reset}#{str}"
   $stdout.flush
 end
+
+# Clears console screen and puts cursor in 0,0.
+#
+def put_cls
+  cls = `clear`
+  put cls
+end
