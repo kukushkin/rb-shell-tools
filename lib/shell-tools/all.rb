@@ -84,5 +84,5 @@ end
 #
 def put_cls
   cls = `clear`
-  put cls
+  putr cls
 end
