@@ -3,7 +3,8 @@ Manifest.txt
 README.txt
 Rakefile
 lib/shell-tools.rb
-lib/shell-tools/all.rb
+lib/shell-tools/system.rb
+lib/shell-tools/console.rb
 spec/shell-tools_spec.rb
 spec/spec_helper.rb
 test/test_shell-tools.rb

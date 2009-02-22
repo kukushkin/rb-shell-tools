@@ -61,28 +61,3 @@ def os_name
     "unknown(#{name})"
   end
 end
-
-
-# Replaces current line in the output with a new one.
-#
-def putr( str )
-  # move cursor to beginning of line
-  cr = "\r"           
-
-  # ANSI escape code to clear line from cursor to end of line
-  # cf. http://en.wikipedia.org/wiki/ANSI_escape_code
-  clear = "\e[0K"     
-
-  # reset lines
-  reset = cr + clear
-
-  print "#{reset}#{str}"
-  $stdout.flush
-end
-
-# Clears console screen and puts cursor in 0,0.
-#
-def put_cls
-  cls = `clear`
-  putr cls
-end
