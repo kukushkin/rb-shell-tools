@@ -23,32 +23,74 @@ def put_cls
   putr cls
 end
 
+# Returns ANSI escaped string.
+#
+def esc_string( esc, text )
+  esc+text.to_s+"\e[0m"
+end
+
 # Returns ANSI escaped string for the red colored text.
 #
 def esc_red( text )
-  "\e[31m"+text+"\e[0m"
+  esc_string "\e[31m", text
 end
 
 # Returns ANSI escaped string for the green colored text.
 #
 def esc_green( text )
-  "\e[32m"+text+"\e[0m"
+  esc_string "\e[32m", text
 end
 
 # Returns ANSI escaped string for the yellow colored text.
 #
 def esc_yellow( text )
-  "\e[33m"+text+"\e[0m"
+  esc_string "\e[33m", text
 end
 
 # Returns ANSI escaped string for the blue colored text.
 #
 def esc_blue( text )
-  "\e[34m"+text+"\e[0m"
+  esc_string "\e[34m", text
 end
 
 # Returns ANSI escaped string for the bold text.
 #
 def esc_bold( text )
-  "\e[01;37m"+text+"\e[22m"
+  esc_string "\e[01;37m", text
+end
+
+
+# Returns pressed key or +nil+ if there is no keyboard input.
+# 
+def kb_getkey
+  kb_raw_no_echo_mode
+
+  begin
+    return $stdin.read_nonblock(1)
+  rescue
+    return nil
+  ensure
+    kb_restore_mode
+  end
+end
+
+# Switches the input mode to raw and disables echo.
+# 
+# *WARNING*:  This method requires the external "stty" program!
+#
+# Pasted from +HighLine+ gem.
+# 
+def kb_raw_no_echo_mode
+  @tty_state = `stty -g`
+  system "stty raw -echo cbreak isig"
+end
+
+# Restores a previously saved input mode.
+# 
+# *WARNING*:  This method requires the external "stty" program!
+#
+# Pasted from +HighLine+ gem.
+# 
+def kb_restore_mode
+  system "stty #{@tty_state}"
 end
