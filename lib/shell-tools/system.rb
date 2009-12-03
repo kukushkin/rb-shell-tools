@@ -34,18 +34,19 @@ end
 #
 def fs_disk_used( path )
   # First, dereference path
-  if File.symlink? @path 
-    p = File.readlink( @path )
+  if File.symlink? path 
+    p = File.readlink( path )
   else
-    p = @path
+    p = path
   end
 	result = `du -ks #{p}`
-	m = /(\d+)\s+.*/.match result
-	if m
-		m[1].to_i*1024
-	else
-		result
+	size = 0
+	result.split("\n").each do |line|
+	  if m = /(\d+)\s+.*/.match(line)
+		  size += m[1].to_i*1024
+	  end
 	end
+	size
 end
 
 # Returns a host OS name in lowercase.
