@@ -14,7 +14,7 @@ def copy_if_newer( from, to, echo = true )
   # if Mac OS X:
   os = os_name()
   if os == 'macosx'
-    sh "cp -n #{from} #{to}", echo
+    sh "cp -nf #{from} #{to}", echo
   else
     # update, force, preserve attrs
     sh "cp -ufp #{from} #{to}", echo
