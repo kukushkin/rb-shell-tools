@@ -39,7 +39,7 @@ def fs_disk_used( path )
   else
     p = path
   end
-	result = `du -ks #{p}`
+	result = `du -ks #{p} 2>/dev/null`
 	size = 0
 	result.split("\n").each do |line|
 	  if m = /(\d+)\s+.*/.match(line)
