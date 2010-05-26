@@ -56,8 +56,8 @@ def os_name
   name.chomp!
   
   case name
-  when 'Darwin' : 'macosx'
-  when 'Linux' : 'linux'
+  when 'Darwin' then 'macosx'
+  when 'Linux' then 'linux'
   else 
     "unknown(#{name})"
   end
