@@ -1,7 +1,7 @@
 
 # Replaces current line in the output with a new one.
 #
-def putr( str )
+def putr( str = '' )
   # move cursor to beginning of line
   cr = "\r"           
 
