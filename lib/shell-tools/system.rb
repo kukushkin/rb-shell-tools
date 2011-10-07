@@ -3,15 +3,8 @@ require 'open3'
 # Execs cmd in a shell and returns true if command executed successfully, 
 # or throws an exception if command failed.
 #
-def _old_sh( cmd, echo = true, out = nil )
-  puts cmd if echo
-  stdout, stderr, status = Open3.capture3( cmd )
-  out.replace stdout if out
-  puts "stdout: #{stdout}"
-  puts "stderr: #{stderr}"
-  puts "status: #{status}"
-  system cmd or raise "Failed to execute: #{cmd}: (#{$?}) #{stderr}"
-end
+SH_STORED_OUTPUT_LIMIT = 2048
+SH_STORED_OUTPUT_LINES = 8
 def sh( cmd, echo = true, capture_output = nil, &block )
   exit_status = nil
   current_output = ''
@@ -32,6 +25,10 @@ def sh( cmd, echo = true, capture_output = nil, &block )
         putc oe_char
       end
       current_output += oe_char
+      if current_output.size > SH_STORED_OUTPUT_LIMIT
+        # squeeze cached output
+        current_output = current_output.split("\n").last(SH_STORED_OUTPUT_LINES).join("\n")
+      end
       yield(oe_char) if block
     end
     exit_status = t.value
