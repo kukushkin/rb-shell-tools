@@ -1,12 +1,58 @@
+require 'open3'
 
 # Execs cmd in a shell and returns true if command executed successfully, 
 # or throws an exception if command failed.
 #
-def sh( cmd, echo = true )
+def _old_sh( cmd, echo = true, out = nil )
   puts cmd if echo
-  system cmd or raise "Failed to execute: #{cmd}: #{$?}"
+  stdout, stderr, status = Open3.capture3( cmd )
+  out.replace stdout if out
+  puts "stdout: #{stdout}"
+  puts "stderr: #{stderr}"
+  puts "status: #{status}"
+  system cmd or raise "Failed to execute: #{cmd}: (#{$?}) #{stderr}"
+end
+def sh( cmd, echo = true, capture_output = nil, &block )
+  exit_status = nil
+  current_output = ''
+  if echo
+    if capture_output
+      capture_output.replace( capture_output+cmd+"\n" )
+    else
+      puts cmd
+    end
+  end
+  Open3.popen2e( cmd ) do |i, oe, t|
+    oe.sync = true
+    while oe_char = oe.getc do
+      # puts "sh: block tick"
+      if capture_output
+        capture_output.replace (capture_output+oe_char)
+      else
+        putc oe_char
+      end
+      current_output += oe_char
+      yield(oe_char) if block
+    end
+    exit_status = t.value
+  end
+  if exit_status != 0
+    raise ShellExecutionError.new("Failed to execute: '#{cmd}' (#{exit_status})", exit_status, current_output) 
+  end
+  true
 end
 
+# Exception class which holds command execution status and current output
+# for exceptions raised from '#sh' method call.
+#
+class ShellExecutionError < StandardError
+  attr_reader :status, :output
+  def initialize( msg = "Failed to execute 'sh'", status, output )
+    super msg
+    @status = status
+    @output = output
+  end
+end
 
 # Copy file if newer.
 #
