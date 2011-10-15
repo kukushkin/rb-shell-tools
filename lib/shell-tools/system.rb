@@ -5,10 +5,14 @@ require 'open3'
 #
 SH_STORED_OUTPUT_LIMIT = 2048
 SH_STORED_OUTPUT_LINES = 8
+$sh_captured_output = []
 def sh( cmd, echo = true, capture_output = nil, &block )
   exit_status = nil
   current_output = ''
   if echo
+    $sh_captured_output.each do |output_channel|
+      output_channel.replace( output_channel+cmd+"\n")
+    end
     if capture_output
       capture_output.replace( capture_output+cmd+"\n" )
     else
@@ -19,6 +23,9 @@ def sh( cmd, echo = true, capture_output = nil, &block )
     oe.sync = true
     while oe_char = oe.getc do
       # puts "sh: block tick"
+      $sh_captured_output.each do |output_channel|
+        output_channel.replace( output_channel+oe_char)
+      end
       if capture_output
         capture_output.replace (capture_output+oe_char)
       else
@@ -37,6 +44,16 @@ def sh( cmd, echo = true, capture_output = nil, &block )
     raise ShellExecutionError.new("Failed to execute: '#{cmd}' (#{exit_status})", exit_status, current_output) 
   end
   true
+end
+
+
+# Captures all outputs of all the #sh executed inside the block into +output+.
+#
+def sh_capture_output( output, &block )
+  $sh_captured_output << output
+  yield
+ensure
+  $sh_captured_output.delete output
 end
 
 # Exception class which holds command execution status and current output
