@@ -19,6 +19,7 @@ def sh( cmd, echo = true, capture_output = nil, &block )
       puts cmd
     end
   end
+  i = STDIN
   Open3.popen2e( cmd ) do |i, oe, t|
     oe.sync = true
     while oe_char = oe.getc do
