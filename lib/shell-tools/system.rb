@@ -7,6 +7,14 @@ SH_STORED_OUTPUT_LIMIT = 2048
 SH_STORED_OUTPUT_LINES = 8
 $sh_captured_output = []
 def sh( cmd, echo = true, capture_output = nil, &block )
+  if $sh_captured_output.size == 0 && capture_output.nil? && block.nil?
+    # simple form
+    puts cmd if echo
+    system cmd or raise ShellExecutionError.new("Failed to execute: '#{cmd}' (#{$?})", $?, '') 
+    return true
+  end
+  
+  # ok, it's a bit more complex
   exit_status = nil
   current_output = ''
   if echo
@@ -21,6 +29,7 @@ def sh( cmd, echo = true, capture_output = nil, &block )
   end
   i = STDIN
   Open3.popen2e( cmd ) do |i, oe, t|
+    i = STDIN
     oe.sync = true
     while oe_char = oe.getc do
       # puts "sh: block tick"
@@ -55,6 +64,15 @@ def sh_capture_output( output, &block )
   yield
 ensure
   $sh_captured_output.delete output
+end
+
+# Prints message and captures it if capture output is enabled.
+#
+def sh_capture_echo( message )
+  puts message
+  $sh_captured_output.each do |output_channel|
+    output_channel.replace( message+cmd+"\n")
+  end
 end
 
 # Exception class which holds command execution status and current output
