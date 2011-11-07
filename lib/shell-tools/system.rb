@@ -19,10 +19,10 @@ def sh( cmd, echo = true, capture_output = nil, &block )
   current_output = ''
   if echo
     $sh_captured_output.each do |output_channel|
-      output_channel.replace( output_channel+cmd+"\n")
+      _sh_capture_concat output_channel, cmd+"\n"
     end
     if capture_output
-      capture_output.replace( capture_output+cmd+"\n" )
+      _sh_capture_concat capture_output, cmd+"\n"
     else
       puts cmd
     end
@@ -34,10 +34,10 @@ def sh( cmd, echo = true, capture_output = nil, &block )
     while oe_char = oe.getc do
       # puts "sh: block tick"
       $sh_captured_output.each do |output_channel|
-        output_channel.replace( output_channel+oe_char)
+        _sh_capture_concat output_channel, oe_char
       end
       if capture_output
-        capture_output.replace (capture_output+oe_char)
+        _sh_capture_concat capture_output, oe_char
       else
         putc oe_char
       end
@@ -69,9 +69,20 @@ end
 # Prints message and captures it if capture output is enabled.
 #
 def sh_capture_echo( message )
-  puts message
   $sh_captured_output.each do |output_channel|
-    output_channel.replace( message+cmd+"\n")
+    _sh_capture_concat output_channel, message+"\n"
+  end
+end
+
+# Concatenates output buffer and text.
+# If output buffer object is a String, the content is #replace-d,
+# otherwise object must provide #text property-accessor.
+#
+def _sh_capture_concat( output_buffer, text )
+  if output_buffer.is_a? String
+    output_buffer.replace( output_buffer + text )
+  else
+    output_buffer.text += text
   end
 end
 
