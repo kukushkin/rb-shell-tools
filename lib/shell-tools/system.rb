@@ -5,9 +5,8 @@ require 'open3'
 #
 SH_STORED_OUTPUT_LIMIT = 2048
 SH_STORED_OUTPUT_LINES = 8
-$sh_captured_output = []
 def sh( cmd, echo = true, capture_output = nil, &block )
-  if $sh_captured_output.size == 0 && capture_output.nil? && block.nil?
+  if _sh_captured_output.size == 0 && capture_output.nil? && block.nil?
     # simple form
     puts cmd if echo
     system cmd or raise ShellExecutionError.new("Failed to execute: '#{cmd}' (#{$?})", $?, '') 
@@ -18,7 +17,7 @@ def sh( cmd, echo = true, capture_output = nil, &block )
   exit_status = nil
   current_output = ''
   if echo
-    $sh_captured_output.each do |output_channel|
+    _sh_captured_output.each do |output_channel|
       _sh_capture_concat output_channel, cmd+"\n"
     end
     if capture_output
@@ -33,7 +32,7 @@ def sh( cmd, echo = true, capture_output = nil, &block )
     oe.sync = true
     while oe_char = oe.getc do
       # puts "sh: block tick"
-      $sh_captured_output.each do |output_channel|
+      _sh_captured_output.each do |output_channel|
         _sh_capture_concat output_channel, oe_char
       end
       if capture_output
@@ -60,16 +59,16 @@ end
 # Captures all outputs of all the #sh executed inside the block into +output+.
 #
 def sh_capture_output( output, &block )
-  $sh_captured_output << output
+  _sh_captured_output << output
   yield
 ensure
-  $sh_captured_output.delete output
+  _sh_captured_output.delete output
 end
 
 # Prints message and captures it if capture output is enabled.
 #
 def sh_capture_echo( message )
-  $sh_captured_output.each do |output_channel|
+  _sh_captured_output.each do |output_channel|
     _sh_capture_concat output_channel, message+"\n"
   end
 end
@@ -84,6 +83,14 @@ def _sh_capture_concat( output_buffer, text )
   else
     output_buffer.text += text
   end
+end
+ 
+# Returns list of capture channels.
+# This list is local to the current thread.
+#
+def _sh_captured_output
+  Thread.current[:sh_captured_output] ||= []
+  Thread.current[:sh_captured_output]
 end
 
 # Exception class which holds command execution status and current output
