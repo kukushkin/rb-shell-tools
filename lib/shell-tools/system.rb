@@ -121,7 +121,7 @@ end
 # Returns the amount in bytes of free disk space in the specified folder.
 #
 def fs_disk_free( path )
-  result = `df -k #{path}`.split("\n")[1]
+  result = `df -P -k #{path}`.split("\n")[1]
   device, d_size, d_usage, d_free = result.split(" ")[0..3]
 	  
   d_free.to_i*1024 # in bytes
