@@ -16,6 +16,13 @@ def putr( str = '' )
   $stdout.flush
 end
 
+# Puts a 'beep' ANSI code.
+#
+def put_beep
+  print "\a"
+  $stdout.flush
+end
+
 # Clears console screen and puts cursor in 0,0.
 #
 def put_cls
